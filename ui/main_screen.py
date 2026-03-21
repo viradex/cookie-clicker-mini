@@ -1,10 +1,15 @@
 import tkinter as tk
 from tkinter import ttk
 
+import constants
+from logic.number import abbreviate_number
+from logic.game_manager import GameManager
+
 
 class MainScreen:
-    def __init__(self, root: tk.Tk):
+    def __init__(self, root: tk.Tk, game_manager: GameManager):
         self.root = root
+        self.game_manager = game_manager
         self.upgrade_widgets = {}
 
         self.create_widgets()
@@ -66,10 +71,16 @@ class MainScreen:
         self.upgrades_container.grid(row=1, column=0, sticky=tk.NSEW)
         self.upgrades_container.columnconfigure(0, weight=1)
 
-        self.create_upgrade("Cursor", "+0 click", "+1 click", 10, 0)
-        self.create_upgrade("Worker", "0 CPS", "+1 CPS each", 50, 1)
-        self.create_upgrade("Farm", "0 CPS", "+5 CPS each", 200, 2)
-        self.create_upgrade("Factory", "0 CPS", "+10 CPS each", 500, 3)
+        self.create_upgrade(
+            "Cursor", "+0 click", "+1 click", constants.CURSOR_BASE_COST, 0
+        )
+        self.create_upgrade(
+            "Worker", "0 CPS", "+1 CPS each", constants.WORKER_BASE_COST, 1
+        )
+        self.create_upgrade("Farm", "0 CPS", "+5 CPS each", constants.FARM_BASE_COST, 2)
+        self.create_upgrade(
+            "Factory", "0 CPS", "+10 CPS each", constants.FACTORY_BASE_COST, 3
+        )
 
     def create_upgrade(
         self, name: str, current_prod: str, effect: str, cost: int, row: int
@@ -113,8 +124,15 @@ class MainScreen:
             "effect_label": effect_label,
         }
 
+    def update_cookie_count(self):
+        cookies_word = "cookie" if self.game_manager.cookies == 1 else "cookies"
+        self.cookies_label.config(
+            text=f"{abbreviate_number(self.game_manager.cookies)} {cookies_word}"
+        )
+
     def on_cookie_click(self):
-        print("Cookie clicked")
+        self.game_manager.click()
+        self.update_cookie_count()
 
     def on_buy_click(self, upgrade: str):
         print(f"Upgrade bought: {upgrade}")

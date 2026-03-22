@@ -218,7 +218,7 @@ class MainScreen:
                 value = upgrade.total_effect()
 
             widgets["production_label"].config(
-                text=f"Current: +{value} {upgrade.format_upgrade_type()}"
+                text=f"Current: +{abbreviate_number(value)} {upgrade.format_upgrade_type()}"
             )
 
     def update_button_states(self):

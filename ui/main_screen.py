@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 
-import constants
 from logic.number import abbreviate_number
 from logic.game_manager import GameManager
 from models.upgrade import Upgrade
@@ -23,6 +22,8 @@ class MainScreen:
     def update_ui(self):
         self.update_cookie_count()
         self.update_cps()
+        self.update_frenzy_click_label()
+
         self.update_upgrades()
         self.update_button_states()
 
@@ -56,12 +57,18 @@ class MainScreen:
 
         # Cookies per second label
         self.cps_label = ttk.Label(
-            self.stats_frame, text="0 cookies per sec", font=("Segoe UI", 12)
+            self.stats_frame,
+            text="0 cookies per sec",
+            font=("Segoe UI", 12),
+            anchor="center",
+            justify="center",
         )
         self.cps_label.grid(row=1, column=0)
 
         # Cookie button (left frame)
         self.cookie_img = tk.PhotoImage(file="assets/cookie.png")
+        self.cookie_frenzy_img = tk.PhotoImage(file="assets/cookie_gold_lg.png")
+
         self.cookie_button = ttk.Button(
             self.left_frame,
             image=self.cookie_img,
@@ -70,11 +77,23 @@ class MainScreen:
         )
         self.cookie_button.grid(row=1, column=0, pady=(5, 10))
 
+        # Click frenzy label
+        self.frenzy_click_label = ttk.Label(
+            self.left_frame,
+            text="",
+            font=("Segoe UI", 12, "bold"),
+            foreground="#B8860B",
+            anchor="center",
+            justify="center",
+        )
+        # self.frenzy_click_label.grid(row=2, column=0, sticky=tk.N, pady=(5, 0))
+
         # Right frame (upgrades)
         self.right_frame = ttk.Frame(self.main_frame, padding=25)
         self.right_frame.grid(row=0, column=1, sticky=tk.NSEW)
 
-        self.right_frame.columnconfigure(0, weight=1)
+        self.right_frame.columnconfigure(0, weight=2)
+        self.right_frame.columnconfigure(1, weight=1)
         self.right_frame.rowconfigure(1, weight=1)
 
         # 'Upgrades' title
@@ -82,8 +101,20 @@ class MainScreen:
             self.right_frame, text="Upgrades", font=("Segoe UI", 14, "bold")
         ).grid(row=0, column=0, sticky=tk.W, pady=(0, 10))
 
+        # Frenzy button
+        self.frenzy_img = tk.PhotoImage(file="assets/cookie_gold.png")
+        self.frenzy_button = ttk.Button(
+            self.right_frame,
+            image=self.frenzy_img,
+            padding=5,
+            command=self.on_frenzy_click,
+        )
+        # This line must be commented out to prevent it from showing when the app first runs
+        # self.frenzy_button.grid(row=0, column=1, sticky=tk.E)
+
+        # All upgrades
         self.upgrades_container = ttk.Frame(self.right_frame)
-        self.upgrades_container.grid(row=1, column=0, sticky=tk.NSEW)
+        self.upgrades_container.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW)
         self.upgrades_container.columnconfigure(0, weight=1)
 
         for upgrade in self.upgrades:
@@ -146,7 +177,30 @@ class MainScreen:
 
     def update_cps(self):
         cps = self.game_manager.get_total_cps()
-        self.cps_label.config(text=f"{abbreviate_number(cps)} cookies per sec")
+
+        if self.game_manager.frenzy_active and self.game_manager.frenzy_type == "cps":
+            self.cps_label.config(
+                text=f"Frenzy (x{self.game_manager.frenzy_multiplier})!\n{abbreviate_number(cps)} cookies per sec",
+                font=("Segoe UI", 12, "bold"),
+                foreground="#B8860B",
+            )
+        else:
+            self.cps_label.config(
+                text=f"{abbreviate_number(cps)} cookies per sec",
+                font=("Segoe UI", 12),
+                foreground="black",
+            )
+
+    def update_frenzy_click_label(self):
+        click = self.game_manager.get_click_power()
+
+        if self.game_manager.frenzy_active and self.game_manager.frenzy_type == "click":
+            self.frenzy_click_label.config(
+                text=f"Frenzy (x{self.game_manager.frenzy_multiplier})!\n{abbreviate_number(click)} cookies per click"
+            )
+            self.frenzy_click_label.grid(row=2, column=0, sticky=tk.N, pady=(5, 0))
+        else:
+            self.frenzy_click_label.grid_forget()
 
     def update_upgrades(self):
         for upgrade in self.upgrades:
@@ -158,8 +212,13 @@ class MainScreen:
                 text=f"Cost: {abbreviate_number(upgrade.get_cost())}"
             )
 
+            if upgrade.upgrade_type == "click":
+                value = upgrade.total_effect() + 1
+            else:
+                value = upgrade.total_effect()
+
             widgets["production_label"].config(
-                text=f"Current: +{upgrade.total_effect()} {upgrade.format_upgrade_type()}"
+                text=f"Current: +{value} {upgrade.format_upgrade_type()}"
             )
 
     def update_button_states(self):
@@ -172,9 +231,28 @@ class MainScreen:
             else:
                 button.config(state="disabled")
 
+    def show_frenzy_button(self):
+        self.frenzy_button.grid(row=0, column=1, sticky=tk.E)
+
+    def hide_frenzy_button(self):
+        self.frenzy_button.grid_forget()
+
+    def change_cookie_img(self, gold=False):
+        if gold:
+            self.cookie_button.config(image=self.cookie_frenzy_img)
+        else:
+            self.cookie_button.config(image=self.cookie_img)
+
     def on_cookie_click(self):
         self.game_manager.click()
         self.update_ui()
+
+    def on_frenzy_click(self):
+        self.frenzy_button.grid_forget()
+        self.game_manager.start_frenzy()
+
+        self.change_cookie_img(gold=True)
+        self.root.on_frenzy_clicked()
 
     def on_buy_click(self, upgrade_id: int):
         success = self.game_manager.buy_upgrade(upgrade_id)

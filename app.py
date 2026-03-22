@@ -1,19 +1,19 @@
 import tkinter as tk
 import math
+import random
 
 import constants
 from ui.main_screen import MainScreen
 from logic.game_manager import GameManager
 from logic.save_manager import SaveManager
 from logic.number import abbreviate_number
-from models.upgrade import Upgrade
 
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        self.title("Cookie Clicker Mini -- 0 cookies")
+        self.title("Cookie Clicker Mini")
         self.iconbitmap("assets/app.ico")
         self.geometry("800x550")
         self.minsize(650, 500)
@@ -29,6 +29,8 @@ class App(tk.Tk):
 
         self.ui = MainScreen(self, self.game_manager, self.upgrades)
         self.game_manager.set_upgrades(self.upgrades)
+
+        self.schedule_frenzy()
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
@@ -51,7 +53,10 @@ class App(tk.Tk):
         self.after(constants.UI_UPDATE_FREQUENCY, self.ui_loop)
 
     def game_loop(self):
-        self.game_manager.tick()
+        frenzy_ended = self.game_manager.tick()
+        if frenzy_ended:
+            self.ui.change_cookie_img(gold=False)
+
         self.after(constants.UI_UPDATE_FREQUENCY, self.game_loop)
 
     def title_loop(self):
@@ -64,6 +69,27 @@ class App(tk.Tk):
         self.save_game_state()
         self.save_manager.save()
         self.after(constants.SAVE_FREQUENCY, self.save_loop)
+
+    def schedule_frenzy(self):
+        delay = random.randint(constants.FRENZY_DELAY_MIN, constants.FRENZY_DELAY_MAX)
+        self.after(delay, self.spawn_frenzy)
+
+    def spawn_frenzy(self):
+        self.ui.show_frenzy_button()
+        self.frenzy_timeout = self.after(constants.FRENZY_MISS_DELAY, self.miss_frenzy)
+
+    def miss_frenzy(self):
+        self.ui.hide_frenzy_button()
+        self.schedule_frenzy()
+
+    def on_frenzy_clicked(self):
+        # Cancel miss timeout
+        if hasattr(self, "frenzy_timeout"):
+            self.after_cancel(self.frenzy_timeout)
+
+        # Wait for frenz to end then spawn again
+        duration = self.game_manager.frenzy_time_left
+        self.after(duration, self.schedule_frenzy)
 
     def on_close(self):
         self.save_game_state()

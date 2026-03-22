@@ -1,15 +1,37 @@
-CURSOR_BASE_COST = 10
-WORKER_BASE_COST = 50
-FARM_BASE_COST = 200
-FACTORY_BASE_COST = 50
-
-CURSOR_EFFECT = 1
-WORKER_EFFECT = 1
-FARM_EFFECT = 5
-FACTORY_EFFECT = 100
-
 CPS_MULTIPLIER = 1.15
-CLICK_POWER = 1
 
 UI_UPDATE_FREQUENCY = 50
+TITLE_UPDATE_FREQUENCY = 50
 SAVE_FREQUENCY = 10000
+
+MAKE_SAVE_FILE_READONLY = True
+
+UPGRADES_DEFAULT_DATA = {
+    0: {
+        "name": "Cursor",
+        "base_cost": 10,
+        "effect": 1,
+        "upgrade_type": "click",
+    },
+    1: {
+        "id": 1,
+        "name": "Worker",
+        "base_cost": 50,
+        "effect": 1,
+        "upgrade_type": "cps",
+    },
+    2: {
+        "id": 2,
+        "name": "Farm",
+        "base_cost": 200,
+        "effect": 5,
+        "upgrade_type": "cps",
+    },
+    3: {
+        "id": 3,
+        "name": "Factory",
+        "base_cost": 500,
+        "effect": 10,
+        "upgrade_type": "cps",
+    },
+}

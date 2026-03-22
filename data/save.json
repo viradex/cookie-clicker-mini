@@ -1,0 +1,21 @@
+{
+  "cookies": 10270,
+  "upgrades": [
+    {
+      "id": 0,
+      "amount": 35
+    },
+    {
+      "id": 1,
+      "amount": 30
+    },
+    {
+      "id": 2,
+      "amount": 24
+    },
+    {
+      "id": 3,
+      "amount": 20
+    }
+  ]
+}

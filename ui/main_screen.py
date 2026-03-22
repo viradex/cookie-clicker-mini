@@ -127,7 +127,7 @@ class MainScreen:
 
         # Buy button (on the right)
         buy_button = ttk.Button(
-            frame, text="Buy", command=lambda: self.on_buy_click(name)
+            frame, text="Buy", command=lambda: self.on_buy_click(upgrade.id)
         )
         buy_button.grid(row=1, column=1, rowspan=2, sticky=tk.E, padx=(12, 0))
 
@@ -176,9 +176,9 @@ class MainScreen:
         self.game_manager.click()
         self.update_ui()
 
-    def on_buy_click(self, upgrade: str):
-        success = self.game_manager.buy_upgrade(upgrade)
+    def on_buy_click(self, upgrade_id: int):
+        success = self.game_manager.buy_upgrade(upgrade_id)
         if success:
             self.update_ui()
         else:
-            print(f"Failed to buy upgrade '{upgrade}'")
+            print(f"Failed to buy upgrade '{upgrade_id}'")

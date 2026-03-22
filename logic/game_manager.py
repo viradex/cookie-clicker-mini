@@ -1,3 +1,4 @@
+import math
 import constants
 
 
@@ -10,7 +11,7 @@ class GameManager:
         self.upgrades = upgrades
 
     def click(self):
-        self.cookies += self.get_click_power()
+        self.cookies += math.floor(self.get_click_power())
 
     def get_click_power(self) -> int:
         return (
@@ -30,10 +31,12 @@ class GameManager:
         )
 
     def tick(self):
-        self.cookies += self.get_total_cps() / (1000 / constants.UI_UPDATE_FREQUENCY)
+        self.cookies += math.floor(
+            self.get_total_cps() / (1000 / constants.UI_UPDATE_FREQUENCY)
+        )
 
-    def buy_upgrade(self, upgrade_name: str) -> bool:
-        upgrade = self.get_upgrade(upgrade_name)
+    def buy_upgrade(self, upgrade_id: int) -> bool:
+        upgrade = self.get_upgrade(upgrade_id)
         if not upgrade:
             return False
 
@@ -46,9 +49,9 @@ class GameManager:
 
         return False
 
-    def get_upgrade(self, name: str):
+    def get_upgrade(self, id: int):
         for upgrade in self.upgrades:
-            if upgrade.name.lower() == name.lower():
+            if upgrade.id == id:
                 return upgrade
 
         return None

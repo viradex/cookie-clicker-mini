@@ -24,3 +24,9 @@ class Upgrade:
 
     def total_effect(self) -> int:
         return self.amount * self.effect
+
+    def is_cps(self) -> bool:
+        return self.upgrade_type == "cps"
+
+    def is_click(self) -> bool:
+        return self.upgrade_type == "click"

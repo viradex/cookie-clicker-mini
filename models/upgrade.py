@@ -12,6 +12,13 @@ class Upgrade:
     upgrade_type: str  # 'click' or 'cps'
     amount: int = 0
 
+    def format_upgrade_type(self) -> str:
+        return (
+            self.upgrade_type.upper()
+            if self.upgrade_type == "cps"
+            else self.upgrade_type
+        )
+
     def get_cost(self) -> int:
         return int(self.base_cost * (constants.CPS_MULTIPLIER**self.amount))
 

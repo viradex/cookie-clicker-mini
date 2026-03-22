@@ -4,6 +4,7 @@ from tkinter import ttk
 import constants
 from logic.number import abbreviate_number
 from logic.game_manager import GameManager
+from models.upgrade import Upgrade
 
 
 class MainScreen:
@@ -18,6 +19,12 @@ class MainScreen:
     def initial_renderer(self):
         self.create_widgets()
         self.update_ui()
+
+    def update_ui(self):
+        self.update_cookie_count()
+        self.update_cps()
+        self.update_upgrades()
+        self.update_button_states()
 
     def create_widgets(self):
         # Main frame
@@ -80,49 +87,31 @@ class MainScreen:
         self.upgrades_container.columnconfigure(0, weight=1)
 
         for upgrade in self.upgrades:
-            self.create_upgrade(
-                upgrade.name,
-                "0",
-                upgrade.effect,
-                upgrade.base_cost,
-                upgrade.upgrade_type,
-                upgrade.id,
-            )
+            self.create_upgrade(upgrade)
 
-    def create_upgrade(
-        self,
-        name: str,
-        current_prod: str,
-        effect: str,
-        cost: int,
-        upgrade_type: str,
-        row: int,
-    ):
+    def create_upgrade(self, upgrade: Upgrade):
         # Main frame for each individual upgrade
         frame = ttk.Frame(self.upgrades_container, padding=10, relief="ridge")
-        frame.grid(row=row, column=0, sticky=tk.EW, pady=5)
+        frame.grid(row=upgrade.id, column=0, sticky=tk.EW, pady=5)
         frame.columnconfigure(0, weight=1)
         frame.columnconfigure(1, weight=0)
 
         # Name
         name_label = ttk.Label(
-            frame, text=f"{name} (x0)", font=("Segoe UI", 11, "bold")
+            frame, text=f"{upgrade.name} (x0)", font=("Segoe UI", 11, "bold")
         )
         name_label.grid(row=0, column=0, sticky=tk.W)
 
-        name = name.lower()
-        formatted_upgrade_type = (
-            upgrade_type.upper() if upgrade_type == "cps" else upgrade_type
-        )
+        name = upgrade.name.lower()
 
         # Cost (on the right)
-        cost_label = ttk.Label(frame, text=f"Cost: {cost}")
+        cost_label = ttk.Label(frame, text=f"Cost: {upgrade.get_cost()}")
         cost_label.grid(row=0, column=1, sticky=tk.E, padx=(12, 0))
 
         # Current production
         production_label = ttk.Label(
             frame,
-            text=f"Current: +{current_prod} {formatted_upgrade_type}",
+            text=f"Current: +0 {upgrade.format_upgrade_type()}",
             font=("Segoe UI", 10),
         )
         production_label.grid(row=1, column=0, sticky=tk.W, pady=(2, 0))
@@ -130,7 +119,7 @@ class MainScreen:
         # Effect each new one has
         effect_label = ttk.Label(
             frame,
-            text=f"+{effect} {formatted_upgrade_type} per {name}",
+            text=f"+{upgrade.effect} {upgrade.format_upgrade_type()} per {name}",
             font=("Segoe UI", 10),
             foreground="gray",
         )
@@ -151,25 +140,45 @@ class MainScreen:
             "buy_button": buy_button,
         }
 
-    def update_ui(self):
-        self.update_cookie_count()
-        self.update_cps()
-        self.update_upgrades()
-
     def update_cookie_count(self):
-        pass
+        cookies = self.game_manager.cookies
+        self.cookies_label.config(text=f"{abbreviate_number(cookies)} cookies")
 
     def update_cps(self):
-        pass
+        cps = self.game_manager.get_total_cps()
+        self.cps_label.config(text=f"{abbreviate_number(cps)} cookies per sec")
 
     def update_upgrades(self):
-        pass
+        for upgrade in self.upgrades:
+            widgets = self.upgrade_widgets[upgrade.name.lower()]
+
+            widgets["name_label"].config(text=f"{upgrade.name} (x{upgrade.amount})")
+
+            widgets["cost_label"].config(
+                text=f"Cost: {abbreviate_number(upgrade.get_cost())}"
+            )
+
+            widgets["production_label"].config(
+                text=f"Current: +{upgrade.total_effect()} {upgrade.format_upgrade_type()}"
+            )
 
     def update_button_states(self):
-        pass
+        for upgrade in self.upgrades:
+            widgets = self.upgrade_widgets[upgrade.name.lower()]
+            button = widgets["buy_button"]
+
+            if self.game_manager.cookies >= upgrade.get_cost():
+                button.config(state="normal")
+            else:
+                button.config(state="disabled")
 
     def on_cookie_click(self):
         self.game_manager.click()
+        self.update_ui()
 
     def on_buy_click(self, upgrade: str):
-        print(f"Upgrade bought: {upgrade}")
+        success = self.game_manager.buy_upgrade(upgrade)
+        if success:
+            self.update_ui()
+        else:
+            print(f"Failed to buy upgrade '{upgrade}'")

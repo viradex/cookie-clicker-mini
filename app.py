@@ -23,6 +23,7 @@ class App(tk.Tk):
     def setup(self):
         self.create_upgrades()
         self.ui = MainScreen(self, self.game_manager, self.upgrades)
+        self.game_manager.set_upgrades(self.upgrades)
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
@@ -33,15 +34,15 @@ class App(tk.Tk):
 
     def ui_loop(self):
         self.ui.update_ui()
-        self.after(100, self.ui_loop)
+        self.after(constants.UI_UPDATE_FREQUENCY, self.ui_loop)
 
     def game_loop(self):
-        # self.game_manager.tick()
-        self.after(100, self.game_loop)
+        self.game_manager.tick()
+        self.after(constants.UI_UPDATE_FREQUENCY, self.game_loop)
 
     def save_loop(self):
         # self.save_manager.save()
-        self.after(10000, self.save_loop)
+        self.after(constants.SAVE_FREQUENCY, self.save_loop)
 
     def on_close(self):
         # self.save_manager.save()
@@ -63,4 +64,5 @@ class App(tk.Tk):
             self.upgrades.append(Upgrade(i, name, cost, effect, upgrade_type))
 
     def run(self):
+        self.start_loops()
         self.mainloop()

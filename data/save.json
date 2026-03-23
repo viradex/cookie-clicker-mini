@@ -1,21 +1,25 @@
 {
-  "cookies": 256098,
+  "cookies": 12,
   "upgrades": [
     {
       "id": 0,
-      "amount": 74
+      "amount": 0,
+      "discovered": true
     },
     {
       "id": 1,
-      "amount": 65
+      "amount": 0,
+      "discovered": false
     },
     {
       "id": 2,
-      "amount": 65
+      "amount": 0,
+      "discovered": false
     },
     {
       "id": 3,
-      "amount": 61
+      "amount": 0,
+      "discovered": false
     }
   ]
 }

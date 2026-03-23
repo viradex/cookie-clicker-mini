@@ -41,6 +41,7 @@ class App(tk.Tk):
             for saved in self.save_manager.data["upgrades"]:
                 if saved["id"] == upgrade.id:
                     saved["amount"] = upgrade.amount
+                    saved["discovered"] = upgrade.discovered
 
     def start_loops(self):
         self.ui_loop()
@@ -54,8 +55,12 @@ class App(tk.Tk):
 
     def game_loop(self):
         frenzy_ended = self.game_manager.tick()
+        unlocked_ids = self.game_manager.check_unlocks()
+
         if frenzy_ended:
             self.ui.change_cookie_img(gold=False)
+        if unlocked_ids:
+            self.on_upgrades_unlocked(unlocked_ids)
 
         self.after(constants.UI_UPDATE_FREQUENCY, self.game_loop)
 
@@ -81,6 +86,12 @@ class App(tk.Tk):
     def miss_frenzy(self):
         self.ui.hide_frenzy_button()
         self.schedule_frenzy()
+
+    def on_upgrades_unlocked(self, upgrades_ids):
+        for uid in upgrades_ids:
+            for saved in self.save_manager.data["upgrades"]:
+                if saved["id"] == uid:
+                    saved["discovered"] = True
 
     def on_frenzy_clicked(self):
         # Cancel miss timeout

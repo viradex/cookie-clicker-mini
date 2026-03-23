@@ -91,6 +91,16 @@ class GameManager:
 
         return None
 
+    def check_unlocks(self):
+        unlocked = []
+
+        for upgrade in self.upgrades:
+            if not upgrade.discovered and self.cookies >= upgrade.base_cost:
+                upgrade.discovered = True
+                unlocked.append(upgrade.id)
+
+        return unlocked
+
     def start_frenzy(self):
         self.frenzy_active = True
         self.frenzy_type = random.choice(["cps", "click"])

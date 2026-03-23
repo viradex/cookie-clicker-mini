@@ -25,7 +25,7 @@ class SaveManager:
         return {
             "cookies": 0,
             "upgrades": [
-                {"id": uid, "amount": 0}
+                {"id": uid, "amount": 0, "discovered": False}
                 for uid in constants.UPGRADES_DEFAULT_DATA.keys()
             ],
         }
@@ -69,6 +69,7 @@ class SaveManager:
         for saved in self.data["upgrades"]:
             uid = saved["id"]
             amount = saved["amount"]
+            discovered = saved.get("discovered", False)
 
             definition = constants.UPGRADES_DEFAULT_DATA[uid]
 
@@ -80,6 +81,7 @@ class SaveManager:
                     effect=definition["effect"],
                     upgrade_type=definition["upgrade_type"],
                     amount=amount,
+                    discovered=discovered,
                 )
             )
 
@@ -99,6 +101,12 @@ class SaveManager:
         for upgrade in self.data["upgrades"]:
             if upgrade["id"] == upgrade_id:
                 upgrade["amount"] += 1
+                return
+
+    def discover_upgrade(self, upgrade_id):
+        for upgrade in self.data["upgrades"]:
+            if upgrade["id"] == upgrade_id:
+                upgrade["discovered"] = True
                 return
 
     def reset(self):

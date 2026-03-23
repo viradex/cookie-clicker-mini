@@ -117,8 +117,15 @@ class MainScreen:
         self.upgrades_container.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW)
         self.upgrades_container.columnconfigure(0, weight=1)
 
-        for upgrade in self.upgrades:
-            self.create_upgrade(upgrade)
+        self.no_upgrades_label = ttk.Label(
+            self.upgrades_container,
+            text="No upgrades yet...\nKeep clicking to unlock some!",
+            font=("Segoe UI", 11),
+            foreground="gray",
+            anchor="center",
+            justify="center",
+        )
+        self.no_upgrades_label.grid(row=0, column=0, pady=20)
 
     def create_upgrade(self, upgrade: Upgrade):
         # Main frame for each individual upgrade
@@ -203,8 +210,19 @@ class MainScreen:
             self.frenzy_click_label.grid_forget()
 
     def update_upgrades(self):
+        any_visible = False
+
         for upgrade in self.upgrades:
-            widgets = self.upgrade_widgets[upgrade.name.lower()]
+            if not upgrade.discovered:
+                continue
+
+            any_visible = True
+            name = upgrade.name.lower()
+
+            if name not in self.upgrade_widgets:
+                self.create_upgrade(upgrade)
+
+            widgets = self.upgrade_widgets[name]
 
             widgets["name_label"].config(text=f"{upgrade.name} (x{upgrade.amount})")
 
@@ -221,8 +239,16 @@ class MainScreen:
                 text=f"Current: +{abbreviate_number(value)} {upgrade.format_upgrade_type()}"
             )
 
+        if any_visible:
+            self.no_upgrades_label.grid_forget()
+        else:
+            self.no_upgrades_label.grid(row=0, column=0, pady=20)
+
     def update_button_states(self):
         for upgrade in self.upgrades:
+            if not upgrade.discovered:
+                continue
+
             widgets = self.upgrade_widgets[upgrade.name.lower()]
             button = widgets["buy_button"]
 

@@ -10,6 +10,7 @@ class Upgrade:
     effect: int
     upgrade_type: str  # 'click' or 'cps'
     amount: int = 0
+    discovered: bool = False
 
     def format_upgrade_type(self) -> str:
         if self.upgrade_type == "cps":

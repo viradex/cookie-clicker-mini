@@ -1,6 +1,9 @@
 import tkinter as tk
+from tkinter import messagebox
 import math
 import random
+import sys
+import os
 
 import constants
 from ui.main_screen import MainScreen
@@ -22,6 +25,7 @@ class App(tk.Tk):
         self.save_manager = SaveManager()
         self.upgrades = self.save_manager.get_upgrades()
 
+        self.check_if_save_tampered()
         self.setup()
 
     def setup(self):
@@ -42,6 +46,14 @@ class App(tk.Tk):
                 if saved["id"] == upgrade.id:
                     saved["amount"] = upgrade.amount
                     saved["discovered"] = upgrade.discovered
+
+    def check_if_save_tampered(self):
+        is_readonly = self.save_manager.is_readonly()
+        if not is_readonly:
+            messagebox.showwarning(
+                "Save File Warning",
+                "The save file has been detected to be writeable and may have been tampered with. Due to this, data from the last save may be missing or corrupt.\n\nIf the program crashes, delete the save file and restart.",
+            )
 
     def start_loops(self):
         self.ui_loop()

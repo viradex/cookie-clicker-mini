@@ -44,3 +44,14 @@ UPGRADES_DEFAULT_DATA = {
         "upgrade_type": "cps",
     },
 }
+
+FRENZY_OPTIONS = [
+    ("cps", 30),
+    ("lucky", 20),
+    ("click", 15),
+    ("crunch", 10),
+    ("mega", 8),
+    ("super", 6),
+    ("jackpot", 6),
+    ("ruin", 5),
+]

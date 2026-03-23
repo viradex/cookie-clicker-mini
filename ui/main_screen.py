@@ -120,7 +120,7 @@ class MainScreen:
         self.no_upgrades_label = ttk.Label(
             self.upgrades_container,
             text="No upgrades yet...\nKeep clicking to unlock some!",
-            font=("Segoe UI", 11),
+            font=("Segoe UI", 11, "italic"),
             foreground="gray",
             anchor="center",
             justify="center",

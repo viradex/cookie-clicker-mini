@@ -1,5 +1,6 @@
 import json
-import math
+import os
+import stat
 from pathlib import Path
 
 import constants
@@ -48,6 +49,10 @@ class SaveManager:
             self.save()
 
             return self.data
+
+    def is_readonly(self):
+        mode = stat.S_IMODE(os.stat(self.json_path).st_mode)
+        return mode == 0o444
 
     def save(self):
         self.data_dir.mkdir(parents=True, exist_ok=True)
